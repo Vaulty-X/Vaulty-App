@@ -1,56 +1,71 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  backend-api:
+  app:
     build:
       context: .
-      dockerfile: Dockerfile.backend-api
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - HOST=0.0.0.0
-    env_file:
-      - backend-api/.env
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/vaulty?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - JWT_ACCESS_SECRET=dev-access-secret-change-in-production
+      - JWT_REFRESH_SECRET=dev-refresh-secret-change-in-production
+      - CORS_ORIGIN=http://localhost:3000
+      - STELLAR_NETWORK=testnet
+      - STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
     depends_on:
-      - oracle-db
-    networks:
-      - remitroot-network
-    restart: unless-stopped
+      - postgres
+      - redis
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
 
-  oracle-service:
+  worker:
     build:
       context: .
-      dockerfile: Dockerfile.oracle
+      dockerfile: Dockerfile
+    command: npm run dev -- --worker
     environment:
-      - NODE_ENV=production
-      - LOG_LEVEL=info
-    env_file:
-      - oracle/.env
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/vaulty?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - JWT_ACCESS_SECRET=dev-access-secret-change-in-production
+      - JWT_REFRESH_SECRET=dev-refresh-secret-change-in-production
+      - CORS_ORIGIN=http://localhost:3000
+      - STELLAR_NETWORK=testnet
+      - STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
     depends_on:
-      - oracle-db
-    networks:
-      - remitroot-network
-    restart: unless-stopped
-
-  oracle-db:
-    image: gvenzl/oracle-xe:21-slim
-    ports:
-      - "1521:1521"
-    environment:
-      - ORACLE_PASSWORD=oracle
-      - APP_USER=remitroot
-      - APP_USER_PASSWORD=remitroot123
+      - postgres
+      - redis
     volumes:
-      - oracle_data:/opt/oracle/oradata
-    networks:
-      - remitroot-network
-    restart: unless-stopped
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=vaulty
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
 volumes:
-  oracle_data:
-
-networks:
-  remitroot-network:
-    driver: bridge
+  postgres_data:
+  redis_data:
