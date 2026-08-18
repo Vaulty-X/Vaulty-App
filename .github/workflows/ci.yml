@@ -1,0 +1,51 @@
+name: CI Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  frontend-checks:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'Frontend/package-lock.json'
+    
+    - name: Install dependencies
+      run: |
+        cd Frontend
+        npm install
+
+  backend-checks:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'Backend/package-lock.json'
+    
+    - name: Install dependencies
+      run: |
+        cd Backend
+        npm install
+    
+    - name: Build
+      run: |
+        cd Backend
+        npm run build
