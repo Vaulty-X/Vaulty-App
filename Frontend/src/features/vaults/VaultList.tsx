@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Plus, Lock, Calendar, TrendingUp } from 'lucide-react';
+import { VaultEmptyState } from './VaultEmptyState';
 
 interface Vault {
   id: string;
@@ -31,19 +32,7 @@ export function VaultList() {
       </div>
 
       {vaults.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🏦</div>
-          <h3 className="text-lg font-medium mb-2">No vaults yet</h3>
-          <p className="text-gray-500 mb-4">
-            Create your first savings vault to start building your financial future
-          </p>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="btn-primary"
-          >
-            Create Your First Vault
-          </button>
-        </div>
+        <VaultEmptyState onCreateVault={() => setShowCreateModal(true)} />
       ) : (
         <div className="grid gap-4">
           {vaults.map((vault) => (
