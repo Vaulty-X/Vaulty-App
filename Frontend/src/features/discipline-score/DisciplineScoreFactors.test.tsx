@@ -1,4 +1,5 @@
 import React from 'react';
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import {
   DisciplineScoreFactors,
@@ -7,7 +8,7 @@ import {
 } from './DisciplineScoreFactors';
 
 // Stub lucide-react icons so tests don't need canvas
-jest.mock('lucide-react', () => ({
+vi.mock('lucide-react', () => ({
   Flame: () => <svg data-testid="icon-flame" />,
   Target: () => <svg data-testid="icon-target" />,
   RefreshCw: () => <svg data-testid="icon-refresh" />,
