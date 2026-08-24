@@ -44,6 +44,31 @@ The backend is responsible for:
 
 # Features
 
+## Anchor Deposit Webhook
+
+Mount `createAnchorWebhookRouter` under `/api/v1/integrations/anchor/webhooks`.
+The endpoint is `POST /api/v1/integrations/anchor/webhooks/deposit` and expects
+the raw request body with `x-anchor-timestamp` and `x-anchor-signature` headers.
+The signature is HMAC-SHA256 over `<timestamp>.<raw-body>` using
+`ANCHOR_WEBHOOK_SECRET`. Timestamps outside the configured replay window are
+rejected before payload parsing or persistence.
+
+Successful delivery acknowledgment:
+
+```json
+{ "acknowledgment": "accepted" }
+```
+
+Duplicate delivery acknowledgment (also HTTP 200):
+
+```json
+{ "acknowledgment": "duplicate" }
+```
+
+Invalid signatures/payloads return HTTP 400, and out-of-order events return
+HTTP 409. Accepted events are queued for settlement processing; this webhook
+does not credit vault balances or initiate Stellar transactions.
+
 ## Authentication
 
 Provides secure user authentication and account management.
